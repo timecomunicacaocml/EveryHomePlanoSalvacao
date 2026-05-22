@@ -136,128 +136,38 @@
 
     <!-- End of headEnd -->
 
-<!-- Banner & Badge Removal -->
-<style id="banner-removal">
-/* Hide Framer badge (any variant) */
+<style id="embed-overrides">
+/* ── Hide scrollbar (keeps scroll + Lenis fully functional) ── */
+html { scrollbar-width: none !important; -ms-overflow-style: none !important; }
+html::-webkit-scrollbar { display: none !important; width: 0 !important; }
+
+/* ── Hide Framer badge ── */
 .__framer-badge-wrapper,
 [class*="__framer-badge"],
-[data-framer-badge],
-div[style*="z-index: 2147483647"],
-div[style*="z-index:2147483647"] { display: none !important; visibility: hidden !important; }
-
-/* Hide frameship / licence banners */
-#frameship-licence-banner,
-[id*="licence-banner"],
-[id*="license-banner"],
-[class*="licence-banner"],
-[class*="license-banner"] { display: none !important; }
+[data-framer-badge] { display: none !important; }
 </style>
-<script>
+
+<script id="banner-removal">
 (function() {
   function removeBanners() {
-    // Remove Framer badge wrapper
-    document.querySelectorAll('.__framer-badge-wrapper, [data-framer-badge]').forEach(function(el){ el.remove(); });
-    
-    // Remove highest-z-index fixed overlays injected by Framer or Frameship
+    document.querySelectorAll('.__framer-badge-wrapper,[data-framer-badge]').forEach(function(el){ el.remove(); });
     document.querySelectorAll('body > div[style]').forEach(function(el) {
       var s = el.getAttribute('style') || '';
-      if ((s.includes('z-index: 2147483647') || s.includes('z-index:2147483647')) && s.includes('fixed')) {
-        el.remove();
-      }
+      if ((s.includes('z-index: 2147483647') || s.includes('z-index:2147483647')) && s.includes('fixed')) el.remove();
     });
-    
-    // Remove any "BUY LICENSE" or "Powered by Framer" banner text nodes
-    document.querySelectorAll('a[href*="framer.com"], a[href*="frameship"]').forEach(function(el) {
+    document.querySelectorAll('a[href*="framer.com"],a[href*="frameship"]').forEach(function(el) {
       var txt = (el.textContent || '').toLowerCase();
       if (txt.includes('buy license') || txt.includes('powered by') || txt.includes('made in framer')) {
         var root = el;
-        while (root.parentElement && root.parentElement !== document.body &&
-               root.parentElement.children.length <= 2) {
-          root = root.parentElement;
-        }
+        while (root.parentElement && root.parentElement !== document.body && root.parentElement.children.length <= 2) root = root.parentElement;
         root.style.display = 'none';
       }
     });
   }
-
-  // Run on DOM ready + after hydration
-  if (document.readyState !== 'loading') { removeBanners(); }
-  else { document.addEventListener('DOMContentLoaded', removeBanners); }
-
-  var obs = new MutationObserver(removeBanners);
-  obs.observe(document.documentElement, { childList: true, subtree: true });
-
-  [500, 1500, 3000, 5000].forEach(function(t){ setTimeout(removeBanners, t); });
-})();
-</script>
-
-<style id="iframe-embed-fix">
-/* Hide scrollbar visually but keep scroll functional */
-html, body {
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
-  overflow-x: hidden !important;
-}
-html::-webkit-scrollbar,
-body::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
-/* Remove 100vh min-height from Framer root containers
-   (fixes circular dependency in iframe auto-height) */
-.framer-vdJ6e[data-layout-template="true"],
-[data-framer-root] {
-  min-height: fit-content !important;
-}
-
-/* Prevent Lenis from clipping content inside iframe */
-html.lenis,
-html.lenis-stopped,
-html.lenis-smooth {
-  overflow: visible !important;
-  height: auto !important;
-}
-</style>
-
-<script id="iframe-height-reporter">
-(function() {
-  function getHeight() {
-    return Math.max(
-      document.body.scrollHeight,
-      document.documentElement.scrollHeight,
-      document.getElementById('main') ? document.getElementById('main').scrollHeight : 0
-    );
-  }
-
-  function report() {
-    var h = getHeight();
-    if (h > 500) {
-      window.parent.postMessage({ type: 'iframeHeight', height: h }, '*');
-    }
-  }
-
-  // Start reporting only after Framer finishes hydration
-  window.addEventListener('load', function() {
-    setTimeout(report, 500);
-    setTimeout(report, 1000);
-    setTimeout(report, 2000);
-    setTimeout(report, 4000);
-  });
-
-  if (window.ResizeObserver) {
-    window.addEventListener('load', function() {
-      setTimeout(function() {
-        var ro = new ResizeObserver(report);
-        ro.observe(document.body);
-        var main = document.getElementById('main');
-        if (main) ro.observe(main);
-      }, 2000);
-    });
-  }
-
-  window.addEventListener('resize', report);
+  if (document.readyState !== 'loading') removeBanners();
+  else document.addEventListener('DOMContentLoaded', removeBanners);
+  new MutationObserver(removeBanners).observe(document.documentElement, { childList:true, subtree:true });
+  [500,1500,3000].forEach(function(t){ setTimeout(removeBanners,t); });
 })();
 </script>
 </head>
@@ -279,7 +189,5 @@ html.lenis-smooth {
 	<!-- Start of bodyEnd -->
     
     <!-- End of bodyEnd -->
-
-
 </body>
 </html>

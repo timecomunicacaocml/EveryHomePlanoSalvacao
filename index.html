@@ -188,6 +188,13 @@ html::-webkit-scrollbar { display: none !important; width: 0 !important; }
   [500,1500,3000].forEach(function(t){ setTimeout(removeBanners,t); });
 })();
 </script>
+<style id="checkmark-fix">
+/* Hide mispositioned Checkmark components */
+[data-framer-name="Checkmark"],
+.framer-10er2a-container,
+.framer-oa3r8l-container {
+  display: none !important;
+}</style>
 </head>
 <body>
 	<script async src="https://events.framer.com/script?v=2" data-fid="45e8ff84b990ec2794bb110c1fa50866b37061f8949ddb1f0404cb92c8f2fdad" data-no-nt></script>

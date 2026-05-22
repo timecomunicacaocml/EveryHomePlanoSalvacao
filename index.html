@@ -209,23 +209,43 @@ div[style*="z-index:2147483647"] { display: none !important; visibility: hidden 
 	<!-- Start of bodyEnd -->
     
     <!-- End of bodyEnd -->
+
 <script id="iframe-height-reporter">
 (function() {
   function reportHeight() {
-    var h = Math.max(
+    var main = document.getElementById('main');
+    var h = main ? main.scrollHeight : Math.max(
       document.body.scrollHeight,
       document.body.offsetHeight,
-      document.documentElement.scrollHeight,
-      document.documentElement.offsetHeight
+      document.documentElement.scrollHeight
     );
-    window.parent.postMessage({ type: 'iframeHeight', height: h }, '*');
+    if (h > 200) {
+      window.parent.postMessage({ type: 'iframeHeight', height: h }, '*');
+    }
   }
-  window.addEventListener('load', function() {
+
+  // ResizeObserver: fires every time content changes size
+  if (window.ResizeObserver) {
+    var ro = new ResizeObserver(reportHeight);
+    ro.observe(document.body);
+    var main = document.getElementById('main');
+    if (main) ro.observe(main);
+    document.addEventListener('DOMContentLoaded', function() {
+      var m = document.getElementById('main');
+      if (m) ro.observe(m);
+    });
+  }
+
+  // Dense polling for first 15s (Framer hydration + animations)
+  var ticks = 0;
+  var poll = setInterval(function() {
     reportHeight();
-    setInterval(reportHeight, 300);
-  });
+    ticks++;
+    if (ticks >= 150) clearInterval(poll);
+  }, 100);
+
+  window.addEventListener('load', reportHeight);
   window.addEventListener('resize', reportHeight);
-  document.addEventListener('DOMContentLoaded', reportHeight);
 })();
 </script>
 </body>

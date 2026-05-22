@@ -190,6 +190,76 @@ div[style*="z-index:2147483647"] { display: none !important; visibility: hidden 
   [500, 1500, 3000, 5000].forEach(function(t){ setTimeout(removeBanners, t); });
 })();
 </script>
+
+<style id="iframe-embed-fix">
+/* Hide scrollbar visually but keep scroll functional */
+html, body {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  overflow-x: hidden !important;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Remove 100vh min-height from Framer root containers
+   (fixes circular dependency in iframe auto-height) */
+.framer-vdJ6e[data-layout-template="true"],
+[data-framer-root] {
+  min-height: fit-content !important;
+}
+
+/* Prevent Lenis from clipping content inside iframe */
+html.lenis,
+html.lenis-stopped,
+html.lenis-smooth {
+  overflow: visible !important;
+  height: auto !important;
+}
+</style>
+
+<script id="iframe-height-reporter">
+(function() {
+  function getHeight() {
+    return Math.max(
+      document.body.scrollHeight,
+      document.documentElement.scrollHeight,
+      document.getElementById('main') ? document.getElementById('main').scrollHeight : 0
+    );
+  }
+
+  function report() {
+    var h = getHeight();
+    if (h > 500) {
+      window.parent.postMessage({ type: 'iframeHeight', height: h }, '*');
+    }
+  }
+
+  // Start reporting only after Framer finishes hydration
+  window.addEventListener('load', function() {
+    setTimeout(report, 500);
+    setTimeout(report, 1000);
+    setTimeout(report, 2000);
+    setTimeout(report, 4000);
+  });
+
+  if (window.ResizeObserver) {
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        var ro = new ResizeObserver(report);
+        ro.observe(document.body);
+        var main = document.getElementById('main');
+        if (main) ro.observe(main);
+      }, 2000);
+    });
+  }
+
+  window.addEventListener('resize', report);
+})();
+</script>
 </head>
 <body>
 	<script async src="https://events.framer.com/script?v=2" data-fid="45e8ff84b990ec2794bb110c1fa50866b37061f8949ddb1f0404cb92c8f2fdad" data-no-nt></script>
@@ -210,43 +280,6 @@ div[style*="z-index:2147483647"] { display: none !important; visibility: hidden 
     
     <!-- End of bodyEnd -->
 
-<script id="iframe-height-reporter">
-(function() {
-  function reportHeight() {
-    var main = document.getElementById('main');
-    var h = main ? main.scrollHeight : Math.max(
-      document.body.scrollHeight,
-      document.body.offsetHeight,
-      document.documentElement.scrollHeight
-    );
-    if (h > 200) {
-      window.parent.postMessage({ type: 'iframeHeight', height: h }, '*');
-    }
-  }
 
-  // ResizeObserver: fires every time content changes size
-  if (window.ResizeObserver) {
-    var ro = new ResizeObserver(reportHeight);
-    ro.observe(document.body);
-    var main = document.getElementById('main');
-    if (main) ro.observe(main);
-    document.addEventListener('DOMContentLoaded', function() {
-      var m = document.getElementById('main');
-      if (m) ro.observe(m);
-    });
-  }
-
-  // Dense polling for first 15s (Framer hydration + animations)
-  var ticks = 0;
-  var poll = setInterval(function() {
-    reportHeight();
-    ticks++;
-    if (ticks >= 150) clearInterval(poll);
-  }, 100);
-
-  window.addEventListener('load', reportHeight);
-  window.addEventListener('resize', reportHeight);
-})();
-</script>
 </body>
 </html>

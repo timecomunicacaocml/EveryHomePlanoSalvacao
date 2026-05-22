@@ -209,5 +209,24 @@ div[style*="z-index:2147483647"] { display: none !important; visibility: hidden 
 	<!-- Start of bodyEnd -->
     
     <!-- End of bodyEnd -->
+<script id="iframe-height-reporter">
+(function() {
+  function reportHeight() {
+    var h = Math.max(
+      document.body.scrollHeight,
+      document.body.offsetHeight,
+      document.documentElement.scrollHeight,
+      document.documentElement.offsetHeight
+    );
+    window.parent.postMessage({ type: 'iframeHeight', height: h }, '*');
+  }
+  window.addEventListener('load', function() {
+    reportHeight();
+    setInterval(reportHeight, 300);
+  });
+  window.addEventListener('resize', reportHeight);
+  document.addEventListener('DOMContentLoaded', reportHeight);
+})();
+</script>
 </body>
 </html>

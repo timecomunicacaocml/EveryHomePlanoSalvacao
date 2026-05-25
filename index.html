@@ -189,12 +189,26 @@ html::-webkit-scrollbar { display: none !important; width: 0 !important; }
 })();
 </script>
 <style id="checkmark-fix">
-/* Hide mispositioned Checkmark components */
-[data-framer-name="Checkmark"],
-.framer-10er2a-container,
-.framer-oa3r8l-container {
-  visibility: hidden !important;
-}</style>
+/*
+  CHECKMARK FIX — por que opacity:0 e não visibility:hidden?
+
+  O animation-init-fix define [data-framer-name] { visibility: visible !important }
+  que se aplica aos FILHOS do Checkmark (ex: ícone com data-framer-name="Icon").
+  Em CSS, um filho com visibility:visible CANCELA o visibility:hidden do pai.
+
+  opacity:0 NÃO tem esse problema: quando o pai tem opacity:0, todos os filhos
+  ficam invisíveis mesmo que tenham opacity:1 explícito (opacity multiplica).
+
+  Esta regra vem DEPOIS de animation-init-fix no CSS, mesma especificidade (0,1,0),
+  portanto GANHA na cascata.
+*/
+
+/* Outer container + inner component — ambos têm data-framer-name="Checkmark" */
+[data-framer-name="Checkmark"] {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+</style>
 </head>
 <body>
 	<script async src="https://events.framer.com/script?v=2" data-fid="45e8ff84b990ec2794bb110c1fa50866b37061f8949ddb1f0404cb92c8f2fdad" data-no-nt></script>
